@@ -58,7 +58,7 @@
 	<!-- Product List -->
 	<section class="container pb-5">
 		<div class="row g-4">
-			<div class="col-md-4" th:each="item : ${products}">
+			<div class="col-md-4" th:each="item : ${products.result}">
 				<div
 					class="card product-card position-relative h-100 d-flex flex-column justify-content-between">
 					<a th:href="@{'/products-detail-' + ${item.id}}"
@@ -92,13 +92,19 @@
 		</div>
 
 		<!-- Pagination -->
-		<nav class="mt-5">
-			<ul class="pagination justify-content-center">
-				<li class="page-item"><a class="page-link" href="#">1</a></li>
-				<li class="page-item"><a class="page-link" href="#">2</a></li>
-				<li class="page-item"><a class="page-link" href="#">3</a></li>
-			</ul>
-		</nav>
+		<form th:action="@{/products-list}" method="get" class="pagination-form">
+			<button class="page-btn prev" type="submit" name="page">&laquo;</button>
+
+			<div class="pagination-numbers">
+				<span th:each="num : ${#numbers.sequence(1, products.totalPage)}">
+					<button type="submit" name="pageNumber" th:text="${num}"
+						th:value="${num}" class="page-btn"></button>
+				</span>
+			</div>
+
+			<button class="page-btn next" type="submit" name="page">&raquo;</button>
+		</form>
+
 	</section>
 	<footer class="bg-dark text-white pt-5 pb-3" th:insert="~{web/fragments/footer :: footerShop}">
 		

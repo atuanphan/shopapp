@@ -46,5 +46,10 @@ public class ProductConverter {
 		productResponse.setDiscountPrice(discountPrice + "đ");
 		return productResponse;
 	}
+	
+	public ProductResponse converterToProductResponseEdit(ProductEntity productEntity) {
+		ProductResponse productResponse = modelMapper.map(productEntity, ProductResponse.class);
+		return productResponse;
+	}
 
 }

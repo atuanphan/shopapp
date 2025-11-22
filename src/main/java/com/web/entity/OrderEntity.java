@@ -46,7 +46,7 @@ public class OrderEntity extends BaseEntity{
 	@Column(name = "notes")
 	private String notes;
 	
-	@OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+	@OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
 	private List<OrderDetail> orderDetails = new ArrayList<>();
 	
 	@ManyToOne

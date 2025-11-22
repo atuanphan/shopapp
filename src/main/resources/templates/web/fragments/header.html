@@ -11,7 +11,7 @@
 
 		<div class="collapse navbar-collapse" id="navbarNav">
 			<ul class="navbar-nav me-auto">
-				<li class="nav-item"><a class="nav-link active" th:href="@{/shop}">Trang
+				<li class="nav-item"><a class="nav-link active" th:href="@{/davy/shop}">Trang
 						chủ</a></li>
 				<li class="nav-item"><a class="nav-link" th:href="@{/products-list}">Sản phẩm</a></li>
 				<li class="nav-item"><a class="nav-link" href="#">Khuyến
@@ -23,9 +23,9 @@
 					<!-- Nếu chưa đăng nhập -->
 					<div class="d-flex align-items-center me-3"
 						th:if="${not isLoggedIn}">
-						<a th:href="@{/login}" class="btn btn-outline-light me-2"> <i
+						<a th:href="@{/davy/login}" class="btn btn-outline-light me-2"> <i
 							class="fas fa-sign-in-alt me-1"></i> Đăng nhập
-						</a> <a th:href="@{/register}" class="btn btn-outline-light"> <i
+						</a> <a th:href="@{/davy/register}" class="btn btn-outline-light"> <i
 							class="fas fa-user-plus me-1"></i> Đăng ký
 						</a>
 					</div>
@@ -44,7 +44,7 @@
 							<li><a class="dropdown-item" th:href="@{/order-success-{id}(id=${userId})}">Đơn
 									hàng</a></li>
 							<li><hr class="dropdown-divider"></li>
-							<li><a class="dropdown-item" th:href="@{/logout}">Đăng
+							<li><a class="dropdown-item" th:href="@{/davy/logout}">Đăng
 									xuất</a></li>
 						</ul>
 					</div>
@@ -55,7 +55,7 @@
 							class="btn btn-outline-light position-relative"> <i
 							class="fas fa-shopping-cart"></i> <span
 							class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
-								3 <!-- hoặc: th:text="${cartItemCount}" -->
+								 <!-- hoặc: th:text="${cartItemCount}" -->
 						</span>
 						<input type="hidden" name="userId" id="userId" th:value="${userId}">					
 						</a>

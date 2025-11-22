@@ -1,0 +1,49 @@
+.status {
+	padding: 6px 12px;
+	border-radius: 8px;
+	color: #fff;
+	font-size: 14px;
+}
+
+.pending {
+	background: #f6b800;
+}
+
+.shipped {
+	background: #007bff;
+}
+
+.delivered {
+	background: #28a745;
+}
+
+.cancelled {
+	background: #dc3545;
+}
+
+button {
+	padding: 6px 12px;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	color: white;
+}
+
+.btn-detail {
+	background: #6c63ff;
+}
+
+.btn-delete {
+	background: #dc3545;
+}
+
+.btnChangeStatus {
+    background-color: #28a745;  
+}
+
+.btnChangeStatus .status-icon {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+   

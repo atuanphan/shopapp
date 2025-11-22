@@ -1,11 +1,14 @@
 package com.web.service.web.impl;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.web.converter.OrderConverter;
@@ -13,11 +16,15 @@ import com.web.entity.CartEntity;
 import com.web.entity.OrderDetail;
 import com.web.entity.OrderEntity;
 import com.web.entity.ProductEntity;
+import com.web.enums.OrderStatusType;
 import com.web.model.dto.OrderDTO;
 import com.web.model.dto.OrderDTOs;
 import com.web.model.dto.OrderDetailDTO;
+import com.web.model.dto.OrderMangementDTO;
+import com.web.model.response.OrderRequest;
 import com.web.model.response.OrderResponse;
 import com.web.model.response.PaymentSuccessResponse;
+import com.web.repository.admin.OrderManagementRepository;
 import com.web.repository.web.CartProductRepository;
 import com.web.repository.web.CartRepository;
 import com.web.repository.web.OrderRepository;
@@ -25,16 +32,18 @@ import com.web.service.web.OrderService;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-	private OrderRepository orderRepository;
-	private OrderConverter orderConverter;
-	private CartRepository cartRepository;
-	private CartProductRepository cartProductRepository;
+	private final OrderRepository orderRepository;
+	private final OrderConverter orderConverter;
+	private final CartRepository cartRepository;
+	private final CartProductRepository cartProductRepository;
+	private final OrderManagementRepository orderManagementRepository;
 
 	@Override
 	public void getPlaceOrder(OrderDTO orderDTO) {
@@ -67,30 +76,53 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public List<OrderDTOs> getOrdersByUser(Long userId) {
         List<OrderEntity> orders = orderRepository.findByUserId(userId);
-
-        return orders.stream().map(order -> {
-            List<OrderDetailDTO> detailDTOs = order.getOrderDetails()
-                    .stream()
-                    .map(detail -> new OrderDetailDTO(
-                            detail.getProduct().getName(),
-                            detail.getProduct().getImageUrl(),
-                            detail.getQuantity(),
-                            detail.getUnitPrice(),
-                            detail.getSubTotal()
-                    ))
-                    .collect(Collectors.toList());
-
-            return new OrderDTOs(
-                    order.getId(),
-                    order.getRecipentName(),
-                    order.getRecipentPhone(),
-                    order.getShippingAddress(),
-                    order.getPaymentMethod(),
-                    order.getOrderStatus(),
-                    order.getTotalAmount(),
-                    detailDTOs
-            );
-        }).collect(Collectors.toList());
+        List<OrderDTOs> result = new ArrayList<OrderDTOs>();
+        for(OrderEntity item : orders) {
+        	OrderDTOs orderDTO = orderConverter.toOrderDTOs(item);
+        	result.add(orderDTO);
+        }
+        return result;
     }
+
+	@Override
+	public List<OrderMangementDTO> getList(OrderRequest orderRequest, Pageable pageable) {
+		Long id = null;
+		if(orderRequest.getId() != null && !orderRequest.getId().equals("")) {
+			id = Long.parseLong(orderRequest.getId().substring(4));
+		}
+		Page<OrderEntity> orders = orderRepository.findAll(pageable);
+		List<OrderMangementDTO> result = new ArrayList<>();
+		if(id != null) {
+			orders = orderRepository.findByUser_Id(id, pageable);
+		}
+		if(orderRequest.getStatus() != null && !orderRequest.getStatus().equals("")) {
+			orders = orderRepository.findByOrderStatus(orderRequest.getStatus(), pageable);
+		}
+		for(OrderEntity item : orders) {
+			OrderMangementDTO order = orderConverter.toOrderDTO(item);
+			result.add(order);
+		}
+		return result;
+	}
+
+	@Override
+	public void deleteOrder(Long[] ids) {
+		if(ids != null) {
+			orderManagementRepository.deleteByIdIn(ids);
+		}
+	}
+
+	@Override
+	public void changeOrderStatus(Long id) {
+		OrderEntity orderEntity = orderRepository.findById(id).get();
+		orderEntity.setOrderStatus(OrderStatusType.PROCESSING.name());
+		orderRepository.save(orderEntity);
+	}
+
+	@Override
+	public int getTotalItem() {
+	    double total = Math.ceil(orderRepository.count()/3);
+		return (int) total;
+	}
 }
 

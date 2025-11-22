@@ -14,5 +14,7 @@ public interface ProductService {
 	public ProductResponse findById(Long id);
 	public ProductDTO addOrUpdateProduct(ProductDTO productDTO);
 	public void deleteProducts(List<Long> ids);
-	public List<ProductResponse> findProducts(ProductSearchRequest productSearchRequest);
+	public List<ProductResponse> findProducts(ProductSearchRequest productSearchRequest, Pageable pageable);
+	public int getTotalItems();
+	public int getAdminItemCount();
 }

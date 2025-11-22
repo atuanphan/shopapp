@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.web.converter.UserConverter;
@@ -27,8 +29,8 @@ public class UserServiceImpl implements UserService{
 	private UserConverter userConverter;
 	
 	@Override
-	public List<UserResponse> findAll(UserRequest userRequest) {
-		List<UserEntity> result = userRepository.findAll(userRequest);
+	public List<UserResponse> findAll(UserRequest userRequest, Pageable pageable) {
+		Page<UserEntity> result = userRepository.findAll(userRequest, pageable, getTotalItems());
 		List<UserResponse> userResponses = new ArrayList<>();
 		for(UserEntity userEntity : result) {
 			UserResponse user = userConverter.covertToUserResponse(userEntity);
@@ -60,6 +62,12 @@ public class UserServiceImpl implements UserService{
 			userEntity.setStatus(0);
 			userRepository.save(userEntity);
 		}	
+	}
+
+	@Override
+	public int getTotalItems() {
+		double total = userRepository.count() / 5;
+		return (int) Math.ceil(total);
 	}
 
 }

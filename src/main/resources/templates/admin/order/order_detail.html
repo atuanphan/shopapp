@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chi tiết đơn hàng (Admin)</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet" />
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<!-- Font Awesome -->
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link th:href="@{/assets/css/admin/order_detail.css}" rel="stylesheet" />
+<link th:href="@{/assets/css/admin/admin_home.css}" rel="stylesheet" />
+</head>
+<body>
+	<div th:insert="admin/menu :: menuAdminShop"></div>
+	<div class="main-content">
+		<div th:insert="admin/header :: headerAdminShop"></div>
+		<div class="card-admin card">
+			<div class="card-body">
+				<h2 class="mb-4 text-center fw-bold">CHI TIẾT ĐƠN HÀNG</h2>
+				<div class="card shadow-sm order-card p-4"
+					th:object="${orderDetail}">
+					<div class="row mb-4">
+						<div class="col-md-6">
+							<h5 class="fw-bold">Thông tin đơn hàng</h5>
+							<p>
+								<b>Mã đơn:</b> <span th:text="*{id}"></span>
+							</p>
+							<p>
+								<b>Ngày tạo:</b> <span th:text="*{createdDate}">21/11/2025
+									- 14:30</span>
+							</p>
+							<p>
+								<b>Trạng thái:</b> <span class="status processing"
+									th:text="*{orderStatus}">Đang xử lý</span>
+							</p>
+						</div>
+						<div class="col-md-6">
+							<h5 class="fw-bold">Thông tin khách hàng</h5>
+							<p>
+								<b>Tên:</b> <span th:text="*{recipentName}"></span>
+							</p>
+							<p>
+								<b>SĐT:</b> <span th:text="*{recipentPhone}"></span>
+							</p>
+							<p>
+								<b>Địa chỉ:</b> <span th:text="*{shippingAddress}"></span>
+							</p>
+						</div>
+					</div>
+
+					<h5 class="fw-bold mb-3">Sản phẩm trong đơn</h5>
+					<div class="table-responsive mb-3">
+						<table class="table table-bordered">
+							<thead class="table-light text-center">
+								<tr>
+									<th>STT</th>
+									<th>Sản phẩm</th>
+									<th>Giá</th>
+									<th>Số lượng</th>
+									<th>Tổng</th>
+								</tr>
+							</thead>
+							<tbody th:each="item, ind : ${orderDetail.orderDetails}">
+								<tr>
+									<td class="text-center" th:text="${ind.index + 1}"></td>
+									<td th:text="${item.productName}">Bánh trung thu đậu xanh</td>
+									<td class="text-center" th:text="${item.unitPrice}">50.000
+										đ</td>
+									<td class="text-center" th:text="${item.quantity}">2</td>
+									<td class="text-center" th:text="${item.subTotal}">100.000
+										đ</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="text-end">
+						<h5 class="fw-bold">
+							Tổng tiền: <span class="text-danger" th:text="*{totalAmount} +'đ'">170.000 đ</span>
+						</h5>
+					</div>
+
+					<div class="mt-4 d-flex justify-content-end gap-2">
+						<button class="btn btn-danger">Hủy đơn</button>
+						<button class="btn btn-success">Xác nhận hoàn tất</button>
+
+						<!-- Nút tạo hóa đơn -->
+						<a 
+							class="btn btn-primary"> <i class="fa-solid fa-file-invoice"></i>
+							Tạo hóa đơn
+						</a>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

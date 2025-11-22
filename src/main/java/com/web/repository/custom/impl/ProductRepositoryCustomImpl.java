@@ -3,6 +3,8 @@ package com.web.repository.custom.impl;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
@@ -69,18 +71,20 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom{
 	}
 	
 	@Override
-	public List<ProductEntity> findAll(ProductRequest productRequest, Pageable pageable) {
+	public Page<ProductEntity> findAll(ProductRequest productRequest, Pageable pageable, int total) {
 		StringBuilder sql = new StringBuilder("SELECT *FROM product p ");
 		StringBuilder where = new StringBuilder("WHERE 1 = 1 ");
 		queryNormal(productRequest, where);
 		querySpecial(productRequest, where);
 		sql.append(where);
 		Query query = entityManager.createNativeQuery(sql.toString(), ProductEntity.class);
-		return query.getResultList();
+		query.setFirstResult((int) pageable.getOffset());
+		query.setMaxResults(pageable.getPageSize());
+		return new PageImpl<ProductEntity>(query.getResultList(), pageable, total);
 	}
 
 	@Override
-	public List<ProductEntity> findProducts(ProductSearchRequest productSearchRequest) {
+	public Page<ProductEntity> findProducts(ProductSearchRequest productSearchRequest, Pageable pageable, int total) {
 		StringBuilder sql = new StringBuilder("SELECT *FROM product p WHERE 1 = 1");
 		if(productSearchRequest.getCategoryName() == null || productSearchRequest.getNameProduct() == null || productSearchRequest.getPriceSort() == null) {
 			sql.append(" ");
@@ -97,7 +101,9 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom{
 			sql.append(" AND p.category LIKE '%" + productSearchRequest.getCategoryName() +"%'");
 		}
 		Query query = entityManager.createNativeQuery(sql.toString(), ProductEntity.class);
-		return query.getResultList();
+		query.setFirstResult((int) pageable.getOffset());
+		query.setMaxResults(pageable.getPageSize());
+		return new PageImpl<ProductEntity>(query.getResultList(), pageable, total);
 	}
 
 }

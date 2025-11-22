@@ -68,13 +68,14 @@
 					<div class="mb-3">
 						<label class="form-label">Tên sản phẩm</label> <input
 							type="text" th:value="${productEdit.name}" class="form-control"
-							id="name" name="name" placeholder="Nhập tên sản phẩm" required>
+							th:field="*{name}" placeholder="Nhập tên sản phẩm" required>
+							<span id="name_error" style="color: red"></span>
 					</div>
 
 					<div class="mb-3">
 						<label class="form-label">Danh mục</label>
 						<select
-							th:value="${productEdit.category}" class="form-select" id="category" name="category"
+							th:value="${productEdit.category}" class="form-select" th:field="*{category}"
 							required>
 							<option value="">-- Chọn danh mục --</option>
 							<option th:each="item : ${categoryType}" th:value="${item.key}" th:text="${item.value}" th:selected="${item.value == productEdit.category}"></option>
@@ -84,55 +85,61 @@
 					<div class="mb-3">
 						<label class="form-label">Giá bán (VNĐ)</label> <input
 							type="number" th:value="${productEdit.price}" class="form-control"
-							id="price" name="price" placeholder="Nhập giá sản phẩm" min="0" required>
+							th:field="*{price}" placeholder="Nhập giá sản phẩm" min="0" required>
+							<p id="price_error" style="color: red"></p>
 					</div>
 
 					<div class="mb-3">
 						<label class="form-label">Giá khuyến mãi (VNĐ)</label> <input
 							type="number" th:value="${productEdit.discountPrice}" class="form-control"
-							id="discountPrice" name="discountPrice" placeholder="Nhập giá sản phẩm" min="0" required>
+							th:field="*{discountPrice}" placeholder="Nhập giá sản phẩm" min="0" required>
+							<p id="discountPrice_error" style="color: red"></p>
 					</div>
 					
 					<div class="mb-3">
 						<label class="form-label">Số lượng</label> <input
 							type="number" th:value="${productEdit.stockQuantity}"
-							class="form-control" id="stockQuantity" name="stockQuantity" placeholder="Nhập số lượng"
+							class="form-control" th:field="*{stockQuantity}" placeholder="Nhập số lượng"
 							min="0" required>
+							<p id="stockQuantity_error" style="color: red"></p>
 					</div>
 					
 					<div class="mb-3">
 						<label class="form-label">Trọng lượng</label> <input
 							type="number" th:value="${productEdit.weight}"
-							class="form-control" id="weight" name="weight" placeholder="Nhập trọng lượng"
+							class="form-control" th:field="*{weight}" placeholder="Nhập trọng lượng"
 							min="0" required>
+							<p id="weight_error" style="color: red"></p>
 					</div>
 					
 					<div class="mb-3">
 						<label class="form-label">Hương vị</label> <input
 							type="text" th:value="${productEdit.flavor}"
-							class="form-control" id="flavor" name="flavor" placeholder="Loại hương vị"
+							class="form-control" th:field="*{flavor}" placeholder="Loại hương vị"
 							min="0" required>
+							<p id="flavor_error" style="color: red"></p>
 					</div>
 					
 					<div class="mb-3">
 						<label class="form-label">Nhãn hàng</label> <input
 							type="text" th:value="${productEdit.brand}"
-							class="form-control" id="brand" name="brand" placeholder="Nhập nhãn hàng"
+							class="form-control" th:field="*{brand}" placeholder="Nhập nhãn hàng"
 							min="0" required>
+							<p id="brand_error" style="color: red"></p>
 					</div>
 					
 					<div class="mb-3">
 						<label class="form-label">Mô tả</label>
-						<textarea name="description" th:text="${productEdit.description}" class="form-control"
-							id="description" rows="3" placeholder="Nhập mô tả sản phẩm"></textarea>
+						<textarea th:text="${productEdit.description}" class="form-control"
+							th:field="*{description}" rows="3" placeholder="Nhập mô tả sản phẩm"></textarea>
+							<p id="description_error" style="color: red"></p>
 					</div>
 
 					<div class="mb-3">
 						<label for="imageUrl" class="form-label">Hình ảnh sản phẩm</label>
 
 						<!-- Upload file -->
-						<input type="file" class="form-control" id="imageUrl"
-							name="imageUrl" accept="image/*">
+						<input type="file" class="form-control" th:field="*{imageUrl}" accept="image/*">
 
 						<!-- Ảnh hiện tại -->
 						
@@ -181,7 +188,15 @@
 	    			} else {
 	    				 alert("Cập nhật sản phẩm thành công");
 	    			}    			  
-	    		  }
+	    		  },
+	    	      error: function (xhr) {
+	    	        let errors = xhr.responseJSON; // Lấy lỗi từ Spring
+
+	    	        // Hiển thị lỗi
+	    	        Object.keys(errors).forEach(field => {
+	    	            $("#" + field + "_error").text(errors[field]);
+	    	        });
+	    	      }
 	    	  });
 	      }
 	      

@@ -42,7 +42,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler{
 		        }
 
 				if(redirectURL == null) {
-					redirectURL ="/shop";
+					redirectURL ="/davy/shop";
 				}		
 			}
 		}

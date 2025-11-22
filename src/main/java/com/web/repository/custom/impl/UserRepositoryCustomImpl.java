@@ -3,6 +3,9 @@ package com.web.repository.custom.impl;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.web.entity.UserEntity;
@@ -44,13 +47,15 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
 	}
 	
 	@Override
-	public List<UserEntity> findAll(UserRequest userRequest) {
+	public Page<UserEntity> findAll(UserRequest userRequest, Pageable pageable, int total) {
 		StringBuilder sql = new StringBuilder("SELECT u.* FROM user u ");
 		StringBuilder where = new StringBuilder(" WHERE 1 = 1 ");
 		queryNormal(userRequest, where);
 		sql.append(where);
 		Query query = entityManager.createNativeQuery(sql.toString(), UserEntity.class);
-		return query.getResultList();
+		query.setFirstResult((int) pageable.getOffset());
+		query.setMaxResults(pageable.getPageSize());
+		return new PageImpl<UserEntity>(query.getResultList(), pageable, total);
 	}
 
 }

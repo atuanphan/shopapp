@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,7 @@ public class ProductServiceImpl implements ProductService{
 	
 	@Override
 	public List<ProductResponse> findAll(ProductRequest productRequest, Pageable pageable) {
-		List<ProductEntity> products = productRepository.findAll(productRequest, pageable);
+		Page<ProductEntity> products = productRepository.findAll(productRequest, pageable, getAdminItemCount());
 		List<ProductResponse> result = new ArrayList<>();
 		for (ProductEntity item : products) {
 			ProductResponse productResponse = productConverter.toProductResponse(item);
@@ -67,7 +68,7 @@ public class ProductServiceImpl implements ProductService{
 	
 	public ProductResponse findById(Long id) {
 		ProductEntity productEntity = productRepository.findById(id).get();
-		ProductResponse productResponse = productConverter.converterToProductResponse(productEntity);
+		ProductResponse productResponse = productConverter.converterToProductResponseEdit(productEntity);
 		return productResponse;
 	}
 	
@@ -103,13 +104,26 @@ public class ProductServiceImpl implements ProductService{
 	}
 
 	@Override
-	public List<ProductResponse> findProducts(ProductSearchRequest productSearchRequest) {
-		List<ProductEntity> productEntities = productRepository.findProducts(productSearchRequest);
+	public List<ProductResponse> findProducts(ProductSearchRequest productSearchRequest, Pageable pageable) {
+		Page<ProductEntity> productEntities = productRepository.findProducts(productSearchRequest, pageable, getTotalItems());
 		List<ProductResponse> result = new ArrayList<>();
 		for(ProductEntity item : productEntities) {
 			ProductResponse productResponse = productConverter.converterToProductResponse(item);
 			result.add(productResponse);
 		}
 		return result;
+	}
+
+	@Override
+	public int getTotalItems() {
+		long total = productRepository.count();
+		int pageSize = 6;;
+		return (int) Math.ceil((double)(total / pageSize));
+	}
+
+	@Override
+	public int getAdminItemCount() {
+		double totalItem = productRepository.count() / 3;
+		return (int) Math.ceil(totalItem);
 	}
 }

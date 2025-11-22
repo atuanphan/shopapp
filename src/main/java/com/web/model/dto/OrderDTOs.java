@@ -4,9 +4,11 @@ import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class OrderDTOs extends AbstractDTO{
 	private Long id;
     private String recipentName;
@@ -14,7 +16,7 @@ public class OrderDTOs extends AbstractDTO{
     private String shippingAddress;
     private String paymentMethod;
     private String orderStatus;
-    private Long totalAmount;
+    private String totalAmount;
     private List<OrderDetailDTO> orderDetails;
 
 }
