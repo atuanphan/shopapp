@@ -1,7 +1,8 @@
 package com.web.repository.custom.impl;
 
 import java.lang.reflect.Field;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -25,7 +26,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom{
 	@PersistenceContext
 	private EntityManager entityManager;
 	
-	public static void queryNormal(ProductRequest productRequest, StringBuilder sql) {
+	public static void queryNormal(ProductRequest productRequest, StringBuilder sql, Map<String, Object> params) {
 		try {
 			Field[] fields = ProductRequest.class.getDeclaredFields();
 			for (Field it : fields) {
@@ -35,9 +36,11 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom{
 					Object value = it.get(productRequest);
 					if(value != null) {
 						if(it.getType().getName().equals("java.lang.Long") || it.getType().getName().equals("java.lang.Integer")) {
-							sql.append(" AND p." + fieldName + "=" + value);
+							sql.append(" AND p." + fieldName).append("=:" + fieldName);
+							params.put(fieldName, value);
 						} else if (it.getType().getName().equals("java.lang.String") && !value.equals("")) {
-							sql.append(" AND p." + fieldName + " LIKE '%" + value + "%'");
+							sql.append(" AND p." + fieldName + " LIKE :" + fieldName);
+							params.put(fieldName, value);
 						}
 					}
 				}
@@ -48,24 +51,29 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom{
 		
 	}
 	
-	public static void querySpecial(ProductRequest productRequest, StringBuilder sql) {
+	public static void querySpecial(ProductRequest productRequest, StringBuilder sql, Map<String, Object> params) {
 		if(productRequest.getPriceFrom() != null || productRequest.getPriceTo() != null) {
 			if(productRequest.getPriceFrom() != null) {
-				sql.append(" AND p.price >=" + productRequest.getPriceFrom());
+				sql.append(" AND p.price >=:price");
+				params.put("price", productRequest.getPriceFrom());
 			}
 			if(productRequest.getPriceTo() != null) {
-				sql.append(" AND p.price <=" + productRequest.getPriceTo());
+				sql.append(" AND p.price <=:price");
+				params.put("price", productRequest.getPriceTo());
 			}
 		}
 		if(productRequest.getStockQuantity() != null) {
-			sql.append(" AND p.stock_quantity >=" + productRequest.getStockQuantity());
+			sql.append(" AND p.stock_quantity >=:stock_quntity");
+			params.put("stock_quantity", productRequest.getStockQuantity());
 		}
 		String status = productRequest.getIsFeatured();
 		if(status != null && !status.equals("")) {
 			if(status.equals("DANG_BAN")) {
-				sql.append(" AND p.is_featured = 1");
+				sql.append(" AND p.is_featured =:is_featured");
+				params.put("is_featured", 1);
 			} else if(status.equals("NGUNG_BAN")){
-				sql.append(" AND p.is_featured = 0");
+				sql.append(" AND p.is_featured =:is_featured");
+				params.put("is_featured", 0);
 			}
 		}
 	}
@@ -74,10 +82,14 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom{
 	public Page<ProductEntity> findAll(ProductRequest productRequest, Pageable pageable, int total) {
 		StringBuilder sql = new StringBuilder("SELECT *FROM product p ");
 		StringBuilder where = new StringBuilder("WHERE 1 = 1 ");
-		queryNormal(productRequest, where);
-		querySpecial(productRequest, where);
+		Map<String, Object> params = new LinkedHashMap<String, Object>();
+		queryNormal(productRequest, where, params);
+		querySpecial(productRequest, where, params);
 		sql.append(where);
 		Query query = entityManager.createNativeQuery(sql.toString(), ProductEntity.class);
+		for(Map.Entry<String, Object> item : params.entrySet()) {
+			query.setParameter(item.getKey(), item.getValue());
+		}
 		query.setFirstResult((int) pageable.getOffset());
 		query.setMaxResults(pageable.getPageSize());
 		return new PageImpl<ProductEntity>(query.getResultList(), pageable, total);
@@ -95,12 +107,18 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom{
 			sql.append(" ORDER BY p.price DESC");
 		}
 		if(productSearchRequest.getNameProduct() != null && !productSearchRequest.getNameProduct().equals("")) {
-			sql.append(" AND p.name LIKE '%" + productSearchRequest.getNameProduct() +"%'");
+			sql.append(" AND p.name LIKE :name");
 		}
 		if(productSearchRequest.getCategoryName() != null && !productSearchRequest.getCategoryName().equals("")) {
-			sql.append(" AND p.category LIKE '%" + productSearchRequest.getCategoryName() +"%'");
+			sql.append(" AND p.category LIKE :category");
 		}
 		Query query = entityManager.createNativeQuery(sql.toString(), ProductEntity.class);
+		if(productSearchRequest.getNameProduct() != null && !productSearchRequest.getNameProduct().equals("")) {
+			query.setParameter("name", "%" + productSearchRequest.getNameProduct() + "%");
+		}
+		if(productSearchRequest.getCategoryName() != null && !productSearchRequest.getCategoryName().equals("")) {
+			query.setParameter("category", "%" + productSearchRequest.getCategoryName() + "%");
+		}
 		query.setFirstResult((int) pageable.getOffset());
 		query.setMaxResults(pageable.getPageSize());
 		return new PageImpl<ProductEntity>(query.getResultList(), pageable, total);

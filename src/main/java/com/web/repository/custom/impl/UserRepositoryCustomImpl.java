@@ -1,7 +1,8 @@
 package com.web.repository.custom.impl;
 
 import java.lang.reflect.Field;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,7 +25,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
 	@PersistenceContext
 	private EntityManager entityManager;
 	
-	public void queryNormal(UserRequest userRequest, StringBuilder sql) {
+	public void queryNormal(UserRequest userRequest, StringBuilder sql, Map<String, Object> params) {
 		try {
 			Field[] fields = UserRequest.class.getDeclaredFields();
 			for(Field it : fields) {
@@ -34,9 +35,11 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
 					Object value = it.get(userRequest);
 					if(value != null) {
 						if(it.getType().getName().equals("java.lang.Long") || it.getType().getName().equals("java.lang.Integer")) {
-							sql.append(" AND u." + fieldName + "=" + value);
+							sql.append(" AND u." + fieldName + "=:" + fieldName);
+							params.put(fieldName, value);
 						} else if(it.getType().getName().equals("java.lang.String") && !value.equals("")) {
-							sql.append(" AND u." + fieldName + " LIKE '%" + value + "%'");
+							sql.append(" AND u." + fieldName + " LIKE :" + fieldName);
+							params.put(fieldName, value);
 						}
 					}
 				}
@@ -50,9 +53,13 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
 	public Page<UserEntity> findAll(UserRequest userRequest, Pageable pageable, int total) {
 		StringBuilder sql = new StringBuilder("SELECT u.* FROM user u ");
 		StringBuilder where = new StringBuilder(" WHERE 1 = 1 ");
-		queryNormal(userRequest, where);
+		Map<String, Object> params = new LinkedHashMap<String, Object>();
+		queryNormal(userRequest, where, params);
 		sql.append(where);
 		Query query = entityManager.createNativeQuery(sql.toString(), UserEntity.class);
+		for(Map.Entry<String, Object> it : params.entrySet()) {
+			query.setParameter(it.getKey(), it.getValue());
+		}
 		query.setFirstResult((int) pageable.getOffset());
 		query.setMaxResults(pageable.getPageSize());
 		return new PageImpl<UserEntity>(query.getResultList(), pageable, total);
